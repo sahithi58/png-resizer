@@ -2,7 +2,6 @@
   "name": "png-resizer",
   "version": "1.0.0",
   "description": "Simple web app to resize PNG images",
-  "type": "module",
   "main": "api/resize.js",
   "scripts": {
     "dev": "vercel dev",
