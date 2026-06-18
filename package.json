@@ -1,0 +1,21 @@
+{
+  "name": "png-resizer",
+  "version": "1.0.0",
+  "description": "Simple web app to resize PNG images",
+  "main": "api/resize.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build needed'",
+    "start": "node api/resize.js"
+  },
+  "keywords": ["png", "resize", "image"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "sharp": "^0.32.0",
+    "busboy": "^1.3.0"
+  },
+  "devDependencies": {
+    "vercel": "^28.0.0"
+  }
+}
