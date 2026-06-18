@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PNG Resizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="number"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .px-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            color: #666;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .drop-zone {
+            border: 3px dashed #667eea;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f9f9ff;
+        }
+
+        .drop-zone:hover {
+            border-color: #764ba2;
+            background: #f0f0ff;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #764ba2;
+            background: #e8e4ff;
+        }
+
+        .drop-zone svg {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .drop-zone p {
+            color: #666;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        .drop-zone .highlight {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0ff;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .file-info p {
+            color: #333;
+            font-size: 13px;
+            margin: 5px 0;
+        }
+
+        .file-info strong {
+            color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f0f0ff;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+            font-size: 14px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .preview-section {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .preview-section.show {
+            display: block;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .preview-item {
+            text-align: center;
+        }
+
+        .preview-item img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 6px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .preview-item p {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ PNG Resizer</h1>
+        <p class="subtitle">Upload a PNG and resize it instantly</p>
+
+        <form id="resizeForm">
+            <div class="form-group">
+                <label for="pxSize">Target Size (pixels)</label>
+                <div class="input-group">
+                    <input 
+                        type="number" 
+                        id="pxSize" 
+                        name="pxSize" 
+                        placeholder="e.g., 800" 
+                        required
+                        min="1"
+                        max="5000"
+                    >
+                    <div class="px-label">px</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Upload PNG File</label>
+                <div class="drop-zone" id="dropZone">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <p>Drag and drop your PNG here</p>
+                    <p>or <span class="highlight">click to browse</span></p>
+                    <input 
+                        type="file" 
+                        id="fileInput" 
+                        name="file" 
+                        accept=".png,image/png"
+                        required
+                    >
+                </div>
+                <div class="file-info" id="fileInfo">
+                    <p><strong>File:</strong> <span id="fileName"></span></p>
+                    <p><strong>Size:</strong> <span id="fileSize"></span></p>
+                </div>
+            </div>
+
+            <button type="submit">Resize Image</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Resizing your image...</p>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="preview-section" id="previewSection">
+            <h3 style="color: #333; margin-bottom: 15px;">Preview</h3>
+            <div class="preview-grid">
+                <div class="preview-item">
+                    <p style="font-weight: 600; margin-bottom: 8px;">Original</p>
+                    <img id="originalPreview" alt="Original">
+                </div>
+                <div class="preview-item">
+                    <p style="font-weight: 600; margin-bottom: 8px;">Resized</p>
+                    <img id="resizedPreview" alt="Resized">
+                </div>
+            </div>
+            <button type="button" id="downloadBtn" style="margin-top: 20px; background: #28a745;">
+                ⬇️ Download Resized Image
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('resizeForm');
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const message = document.getElementById('message');
+        const loading = document.getElementById('loading');
+        const previewSection = document.getElementById('previewSection');
+        let selectedFile = null;
+        let resizedImageBlob = null;
+
+        // Drag and drop
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+
+            const file = files[0];
+            if (file.type !== 'image/png') {
+                showMessage('Please upload a PNG file', 'error');
+                return;
+            }
+
+            selectedFile = file;
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
+            fileInfo.classList.add('show');
+            previewSection.classList.remove('show');
+            message.classList.remove('show');
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!selectedFile) {
+                showMessage('Please select a PNG file', 'error');
+                return;
+            }
+
+            const pxSize = document.getElementById('pxSize').value;
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('size', pxSize);
+
+            loading.classList.add('show');
+            message.classList.remove('show');
+
+            try {
+                const response = await fetch('/api/resize', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`);
+                }
+
+                resizedImageBlob = await response.blob();
+                
+                // Show preview
+                const originalReader = new FileReader();
+                originalReader.onload = (e) => {
+                    document.getElementById('originalPreview').src = e.target.result;
+                };
+                originalReader.readAsDataURL(selectedFile);
+
+                const resizedReader = new FileReader();
+                resizedReader.onload = (e) => {
+                    document.getElementById('resizedPreview').src = e.target.result;
+                };
+                resizedReader.readAsBlob(resizedImageBlob);
+
+                previewSection.classList.add('show');
+                showMessage('Image resized successfully!', 'success');
+            } catch (error) {
+                showMessage('Failed to resize image: ' + error.message, 'error');
+            } finally {
+                loading.classList.remove('show');
+            }
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            if (!resizedImageBlob) return;
+
+            const url = URL.createObjectURL(resizedImageBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'resized-' + (selectedFile?.name || 'image.png');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = `message ${type} show`;
+        }
+    </script>
+</body>
+</html>
